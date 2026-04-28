@@ -1,17 +1,17 @@
 """
-Phase 1 Frontend — Job Description Analyzer
+JD Analyzer — Frontend
 Streamlit UI for the LangChain extraction pipeline
 """
 
 import os
 import streamlit as st
-from phase1_backend import analyze_job_description
+from jd_analyzer import analyze_job_description
 
 # ─────────────────────────────────────────────
 # Page Config
 # ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="JD Analyzer — Phase 1",
+    page_title="JD Analyzer",
     page_icon="🎯",
     layout="wide"
 )
@@ -211,16 +211,16 @@ with st.sidebar:
     )
     if groq_key:
         os.environ["GROQ_API_KEY"] = groq_key
-        st.success("✅ Key set!")
+        st.success("Key set!")
 
     st.markdown("---")
-    st.markdown('<p class="section-title">📚 Phase 1 Concepts</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-title">How It Works</p>', unsafe_allow_html=True)
     concepts = {
-        "🤖 LLM": "ChatGroq with Llama 3.3-70b",
-        "📝 Prompt Template": "ChatPromptTemplate with system + human messages",
-        "🔗 LCEL Chain": "prompt | llm | parser",
-        "📦 StrOutputParser": "Returns plain string",
-        "🏗️ PydanticOutputParser": "Returns typed Python object",
+        "LLM": "ChatGroq with Llama 3.3-70b",
+        "Prompt Template": "ChatPromptTemplate with system + human messages",
+        "LCEL Chain": "prompt | llm | parser",
+        "StrOutputParser": "Returns plain string",
+        "PydanticOutputParser": "Returns typed Python object",
     }
     for concept, desc in concepts.items():
         st.markdown(f"**{concept}**")
@@ -228,7 +228,7 @@ with st.sidebar:
         st.markdown("")
 
     st.markdown("---")
-    st.caption("Phase 1 of AI Job Application Agent")
+    st.caption("AI Job Application Agent")
 
 # ─────────────────────────────────────────────
 # Main Content
@@ -240,7 +240,7 @@ st.markdown('<p style="color: #666; margin-bottom: 32px;">Paste any JD → Get s
 col1, col2 = st.columns([3, 2], gap="large")
 
 with col1:
-    st.markdown('<p class="section-title">📋 Job Description</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-title"> Job Description</p>', unsafe_allow_html=True)
     jd_input = st.text_area(
         label="jd",
         label_visibility="collapsed",
@@ -259,7 +259,7 @@ Requirements:
     )
 
 with col2:
-    st.markdown('<p class="section-title">🧑‍💻 Your Current Skills</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-title"> Your Current Skills</p>', unsafe_allow_html=True)
     skills_input = st.text_area(
         label="skills",
         label_visibility="collapsed",
@@ -275,28 +275,28 @@ SQL, Git, Docker basics...""",
     run_gap = st.checkbox("Include Skills Gap Analysis", value=True)
 
     st.markdown("")
-    analyze_btn = st.button("🚀 Analyze JD", use_container_width=True)
+    analyze_btn = st.button(" Analyze JD", use_container_width=True)
 
 # ─────────────────────────────────────────────
 # Output section
 # ─────────────────────────────────────────────
 if analyze_btn:
     if not jd_input.strip():
-        st.error("⚠️ Please paste a job description first.")
+        st.error("Please paste a job description first.")
     elif not os.environ.get("GROQ_API_KEY"):
-        st.error("⚠️ Please enter your Groq API key in the sidebar.")
+        st.error("Please enter your Groq API key in the sidebar.")
     else:
         candidate_skills = skills_input if (run_gap and skills_input.strip()) else None
 
-        with st.spinner("🤖 Analyzing job description..."):
+        with st.spinner("Analyzing job description..."):
             try:
                 results = analyze_job_description(jd_input, candidate_skills)
 
                 st.markdown("---")
-                st.markdown("## 📊 Results")
+                st.markdown("## Results")
 
                 # ── Tab layout for results ──
-                tab1, tab2, tab3 = st.tabs(["📝 Summary", "🏗️ Structured Data", "📈 Skills Gap"])
+                tab1, tab2, tab3 = st.tabs(["Summary", "Structured Data", "Skills Gap"])
 
                 # Tab 1: Summary
                 with tab1:
@@ -306,7 +306,7 @@ if analyze_btn:
                     st.markdown('</div>', unsafe_allow_html=True)
 
                     st.markdown("")
-                    st.markdown('<p class="section-title">💡 What happened under the hood</p>', unsafe_allow_html=True)
+                    st.markdown('<p class="section-title">What happened under the hood</p>', unsafe_allow_html=True)
                     with st.expander("See the chain that ran"):
                         st.code("""
 # Chain 1: Summary Chain
@@ -359,37 +359,37 @@ result = chain.invoke({"job_description": jd_text})
                     d1, d2 = st.columns(2)
                     with d1:
                         st.markdown('<div class="card">', unsafe_allow_html=True)
-                        st.markdown(f"**🎯 Role:** {jd_data.role}")
+                        st.markdown(f"**Role:** {jd_data.role}")
                         if jd_data.company:
-                            st.markdown(f"**🏢 Company:** {jd_data.company}")
-                        st.markdown(f"**📅 Experience:** {jd_data.experience_required}")
+                            st.markdown(f"**Company:** {jd_data.company}")
+                        st.markdown(f"**Experience:** {jd_data.experience_required}")
                         if jd_data.education:
-                            st.markdown(f"**🎓 Education:** {jd_data.education}")
+                            st.markdown(f"**Education:** {jd_data.education}")
                         if jd_data.job_type:
-                            st.markdown(f"**💼 Type:** {jd_data.job_type}")
+                            st.markdown(f"**Type:** {jd_data.job_type}")
                         st.markdown('</div>', unsafe_allow_html=True)
 
                         st.markdown('<div class="card">', unsafe_allow_html=True)
-                        st.markdown("**📌 Responsibilities**")
+                        st.markdown("**Responsibilities**")
                         for r in jd_data.responsibilities:
                             st.markdown(f"• {r}")
                         st.markdown('</div>', unsafe_allow_html=True)
 
                     with d2:
                         st.markdown('<div class="card">', unsafe_allow_html=True)
-                        st.markdown("**✅ Required Skills**")
+                        st.markdown("**Required Skills**")
                         skills_html = " ".join([f'<span class="skill-tag">{s}</span>' for s in jd_data.required_skills])
                         st.markdown(skills_html, unsafe_allow_html=True)
                         st.markdown("</div>", unsafe_allow_html=True)
 
                         st.markdown('<div class="card">', unsafe_allow_html=True)
-                        st.markdown("**⭐ Preferred Skills**")
+                        st.markdown("**Preferred Skills**")
                         pref_html = " ".join([f'<span class="skill-tag skill-tag-preferred">{s}</span>' for s in jd_data.preferred_skills])
                         st.markdown(pref_html, unsafe_allow_html=True)
                         st.markdown("</div>", unsafe_allow_html=True)
 
                         st.markdown('<div class="card card-blue">', unsafe_allow_html=True)
-                        st.markdown("**🔍 Role Summary**")
+                        st.markdown("**Role Summary**")
                         st.write(jd_data.summary)
                         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -439,7 +439,7 @@ result = chain.invoke({
 })
                             """, language="python")
                     else:
-                        st.info("💡 Enable 'Skills Gap Analysis' and add your skills to see this.")
+                        st.info("Enable 'Skills Gap Analysis' and add your skills to see this.")
 
             except Exception as e:
                 st.error(f"❌ Error: {str(e)}")
@@ -453,7 +453,7 @@ result = chain.invoke({
 st.markdown("---")
 st.markdown(
     '<p style="text-align:center; color: #444; font-size: 12px; font-family: Space Mono, monospace;">'
-    'AI Job Application Agent · Phase 1 · LangChain Foundations'
+    'AI Job Application Agent · JD Intelligence'
     '</p>',
     unsafe_allow_html=True
 )

@@ -1,6 +1,6 @@
 """
-Phase 1 Backend — Job Description Extractor
-Concepts: LLMs, ChatPromptTemplate, LCEL chains, PydanticOutputParser, StrOutputParser
+JD Analyzer — Backend
+Handles JD parsing, structured extraction, and skills gap analysis.
 """
 
 import os
@@ -13,11 +13,10 @@ from pydantic import BaseModel, Field
 
 
 # ─────────────────────────────────────────────
-# STEP 1: Define the Pydantic Model (Data Schema)
-# This tells the LLM exactly what structure to return
+# Data Schema
 # ─────────────────────────────────────────────
 class JobDescription(BaseModel):
-    """Structured representation of a Job Description"""
+    """Structured representation of a job description."""
 
     role: str = Field(description="The job title or role name")
     company: Optional[str] = Field(description="Company name if mentioned")
@@ -32,29 +31,26 @@ class JobDescription(BaseModel):
 
 
 # ─────────────────────────────────────────────
-# STEP 2: Initialize the LLM
+# LLM
 # ─────────────────────────────────────────────
 def get_llm(temperature: float = 0.0):
     """
-    Returns a ChatGroq LLM instance.
-    Temperature 0.0 = deterministic (good for extraction tasks).
+    Returns a ChatGroq instance.
+    Temperature 0.0 for extraction tasks, slightly higher for generative ones.
     """
     return ChatGroq(
-        model="llama-3.3-70b-versatile",  # free on Groq
+        model="llama-3.3-70b-versatile",
         temperature=temperature,
         api_key=os.environ.get("GROQ_API_KEY")
     )
 
 
 # ─────────────────────────────────────────────
-# STEP 3: Build Chain 1 — Simple Summary Chain
-# Uses: ChatPromptTemplate + LLM + StrOutputParser
+# Summary Chain
 # ─────────────────────────────────────────────
 def build_summary_chain():
-    """
-    Simple chain that returns a plain text summary of the JD.
-    Good for understanding StrOutputParser.
-    """
+    """Returns a plain text summary of the job description."""
+
     llm = get_llm(temperature=0.3)
 
     prompt = ChatPromptTemplate.from_messages([
@@ -76,23 +72,18 @@ def build_summary_chain():
         )
     ])
 
-    # LCEL chain: prompt → llm → string parser
     chain = prompt | llm | StrOutputParser()
     return chain
 
 
 # ─────────────────────────────────────────────
-# STEP 4: Build Chain 2 — Structured Extraction Chain
-# Uses: PydanticOutputParser — returns a JobDescription object
+# Structured Extraction Chain
 # ─────────────────────────────────────────────
 def build_extraction_chain():
-    """
-    Structured chain that extracts all key details from JD
-    into a typed Python object using PydanticOutputParser.
-    """
+    """Extracts structured fields from the JD and returns a JobDescription object."""
+
     llm = get_llm(temperature=0.0)
 
-    # Parser knows the schema and injects format instructions into prompt
     parser = PydanticOutputParser(pydantic_object=JobDescription)
 
     prompt = ChatPromptTemplate.from_messages([
@@ -113,28 +104,22 @@ def build_extraction_chain():
         )
     ]).partial(format_instructions=parser.get_format_instructions())
 
-    # LCEL chain: prompt → llm → pydantic parser
     chain = prompt | llm | parser
     return chain
 
 
 # ─────────────────────────────────────────────
-# STEP 5: Build Chain 3 — Skills Gap Analyzer
-# Combines structured extraction + gap analysis in sequence
+# Skills Gap Chain
 # ─────────────────────────────────────────────
 def build_skills_gap_chain():
-    """
-    Takes JD + user's skills → returns a gap analysis.
-    Shows how to pass multiple inputs to a chain.
-    """
+    """Compares the candidate's skills against the JD and returns a gap analysis."""
+
     llm = get_llm(temperature=0.2)
 
     prompt = ChatPromptTemplate.from_messages([
         (
             "system",
-            """You are a career coach who specializes in helping people 
-            identify skill gaps and plan their learning path. 
-            Be honest but encouraging."""
+            """You are a career coach. Identify skill gaps clearly and suggest a practical path forward."""
         ),
         (
             "human",
@@ -147,11 +132,11 @@ def build_skills_gap_chain():
             {candidate_skills}
 
             Please provide:
-            1. ✅ Skills they already have (matching skills)
-            2. ❌ Skills they are missing (must-learn)
-            3. 📈 Skills they should improve
-            4. 🎯 Overall fit score (out of 10)
-            5. 💡 Top 3 recommendations to become a stronger candidate
+            1. Skills they already have (matching skills)
+            2. Skills they are missing (must-learn)
+            3. Skills they should improve
+            4. Overall fit score (out of 10)
+            5. Top 3 recommendations to become a stronger candidate
             """
         )
     ])
@@ -161,28 +146,20 @@ def build_skills_gap_chain():
 
 
 # ─────────────────────────────────────────────
-# STEP 6: Main runner function
+# Entry Point
 # ─────────────────────────────────────────────
 def analyze_job_description(jd_text: str, candidate_skills: str = None):
-    """
-    Main function that runs all 3 chains on a given JD.
-    Returns dict with summary, structured_data, and gap_analysis.
-    """
+    """Runs all three chains against the provided JD. Returns summary, structured data, and optional gap analysis."""
+
     results = {}
 
-    # Run summary chain
-    print("🔍 Generating summary...")
     summary_chain = build_summary_chain()
     results["summary"] = summary_chain.invoke({"job_description": jd_text})
 
-    # Run extraction chain
-    print("📊 Extracting structured data...")
     extraction_chain = build_extraction_chain()
     results["structured_data"] = extraction_chain.invoke({"job_description": jd_text})
 
-    # Run gap analysis if skills provided
     if candidate_skills:
-        print("📈 Analyzing skills gap...")
         gap_chain = build_skills_gap_chain()
         results["gap_analysis"] = gap_chain.invoke({
             "job_description": jd_text,
@@ -230,14 +207,14 @@ if __name__ == "__main__":
 
     results = analyze_job_description(sample_jd, sample_skills)
 
-    print("\n" + "="*60)
-    print("📝 SUMMARY")
-    print("="*60)
+    print("\n" + "=" * 60)
+    print("SUMMARY")
+    print("=" * 60)
     print(results["summary"])
 
-    print("\n" + "="*60)
-    print("📊 STRUCTURED DATA")
-    print("="*60)
+    print("\n" + "=" * 60)
+    print("STRUCTURED DATA")
+    print("=" * 60)
     jd = results["structured_data"]
     print(f"Role: {jd.role}")
     print(f"Company: {jd.company}")
@@ -245,7 +222,7 @@ if __name__ == "__main__":
     print(f"Experience: {jd.experience_required}")
     print(f"Summary: {jd.summary}")
 
-    print("\n" + "="*60)
-    print("📈 SKILLS GAP ANALYSIS")
-    print("="*60)
+    print("\n" + "=" * 60)
+    print("SKILLS GAP ANALYSIS")
+    print("=" * 60)
     print(results["gap_analysis"])

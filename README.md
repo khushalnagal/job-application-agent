@@ -46,13 +46,13 @@ streamlit run phase1_streamlit.py
 
 ## 3 Chains Built
 
-### Chain 1 — Summary Chain
+### Chain 1 - Summary Chain
 ```python
 chain = prompt | ChatGroq() | StrOutputParser()
 ```
 Returns a plain string summary of the JD.
 
-### Chain 2 — Extraction Chain
+### Chain 2 - Extraction Chain
 ```python
 chain = prompt | ChatGroq(temperature=0) | PydanticOutputParser(...)
 ```
@@ -61,7 +61,7 @@ Returns a typed `JobDescription` object with fields:
 - `experience_required`, `education`, `responsibilities`
 - `location`, `job_type`, `summary`
 
-### Chain 3 — Skills Gap Chain
+### Chain 3 - Skills Gap Chain
 ```python
 chain = prompt | ChatGroq(temperature=0.2) | StrOutputParser()
 ```

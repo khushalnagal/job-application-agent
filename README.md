@@ -1,9 +1,9 @@
-# 🎯 AI Job Application Agent — Phase 1
+#  AI Job Application Agent 
 ## Job Description Analyzer using LangChain
 
 ---
 
-## 📚 Concepts Covered
+## Concepts Covered
 - LLMs with ChatGroq (Llama 3.3-70b, free)
 - ChatPromptTemplate (system + human messages)
 - LCEL Chains using the `|` pipe operator
@@ -13,7 +13,7 @@
 
 ---
 
-## 🗂️ Files
+## Files
 ```
 phase1_backend.py     → All LangChain logic (3 chains)
 phase1_streamlit.py   → Streamlit UI
@@ -22,7 +22,7 @@ requirements.txt      → Dependencies
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ### 1. Install dependencies
 ```bash
@@ -44,7 +44,7 @@ streamlit run phase1_streamlit.py
 
 ---
 
-## 🔗 3 Chains Built
+## 3 Chains Built
 
 ### Chain 1 — Summary Chain
 ```python
@@ -69,7 +69,7 @@ Takes JD + your skills → returns gap analysis with fit score.
 
 ---
 
-## 🔑 Free Resources Used
+##  Free Resources Used
 | Tool | Cost | Link |
 |------|------|------|
 | Groq API | Free tier | console.groq.com |

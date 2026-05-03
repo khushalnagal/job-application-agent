@@ -9,7 +9,7 @@ import pdfplumber
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
+from langchain_core.output_parsers import PydanticOutputParser
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 
@@ -58,15 +58,10 @@ def get_llm(temperature: float = 0.0):
 # PDF Text Extraction + Spacing Fix
 # ─────────────────────────────────────────────
 def fix_spacing(text: str) -> str:
-    """Fix common PDF extraction issues like missing spaces between words."""
-    # Add space before capital letters that follow lowercase (camelCase words)
     text = re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
-    # Fix words stuck together with common patterns
     text = re.sub(r'([a-zA-Z])(\d)', r'\1 \2', text)
     text = re.sub(r'(\d)([a-zA-Z])', r'\1 \2', text)
-    # Fix multiple spaces
     text = re.sub(r' +', ' ', text)
-    # Fix missing space after punctuation
     text = re.sub(r'([.,;:])([a-zA-Z])', r'\1 \2', text)
     return text.strip()
 
@@ -90,7 +85,7 @@ def structure_resume(raw_text: str, llm) -> ResumeData:
     prompt = ChatPromptTemplate.from_messages([
         (
             "system",
-            """You are a professional resume parser. Extract structured information 
+            """You are a professional resume parser. Extract structured information
             from the resume text accurately and completely.
             {format_instructions}"""
         ),
@@ -121,7 +116,7 @@ def score_resume(raw_text: str, structured: ResumeData, llm) -> ResumeScore:
             You know exactly how ATS systems work and what the current job market demands.
             Be honest and strict with scoring — most resumes score between 40-75.
             Only truly exceptional resumes score above 85.
-            
+
             {format_instructions}"""
         ),
         (
@@ -161,139 +156,120 @@ def score_resume(raw_text: str, structured: ResumeData, llm) -> ResumeScore:
 # ─────────────────────────────────────────────
 # Pretty Print
 # ─────────────────────────────────────────────
+def wrap_text(text: str, width: int = 57, indent: str = "  ") -> None:
+    words = text.split()
+    line = indent
+    for word in words:
+        if len(line) + len(word) > width:
+            print(line)
+            line = indent + word + " "
+        else:
+            line += word + " "
+    print(line)
+
+
 def print_results(raw_text: str, structured: ResumeData, score: ResumeScore):
     div = "=" * 60
     thin = "-" * 60
 
     print(f"\n{div}")
-    print("  RESUME PARSER — FULL REPORT")
+    print("RESUME PARSER — FULL REPORT")
     print(f"{div}\n")
 
-    # Basic Info
-    print("📋  BASIC INFORMATION")
+    print("BASIC INFORMATION")
     print(thin)
-    print(f"  Name        : {structured.name or 'Not found'}")
-    print(f"  Email       : {structured.email or 'Not found'}")
-    print(f"  Phone       : {structured.phone or 'Not found'}")
-    print(f"  Location    : {structured.location or 'Not found'}")
+    print(f"Name        : {structured.name or 'Not found'}")
+    print(f"Email       : {structured.email or 'Not found'}")
+    print(f"Phone       : {structured.phone or 'Not found'}")
+    print(f"Location    : {structured.location or 'Not found'}")
     print()
 
-    # Summary
     if structured.summary:
-        print("📝  SUMMARY")
+        print("SUMMARY")
         print(thin)
-        # Wrap summary text at 55 chars
-        words = structured.summary.split()
-        line = "  "
-        for word in words:
-            if len(line) + len(word) > 57:
-                print(line)
-                line = "  " + word + " "
-            else:
-                line += word + " "
-        print(line)
+        wrap_text(structured.summary)
         print()
 
-    # Skills
-    print("🛠️   SKILLS")
+    print("SKILLS")
     print(thin)
     skills_line = ""
     for i, skill in enumerate(structured.skills):
         skills_line += skill
         if i < len(structured.skills) - 1:
-            skills_line += "  •  "
+            skills_line += " | "
         if len(skills_line) > 55:
-            print(f"  {skills_line}")
+            print(f"{skills_line}")
             skills_line = ""
     if skills_line:
-        print(f"  {skills_line}")
+        print(f"{skills_line}")
     print()
 
-    # Experience
-    print("💼  EXPERIENCE")
+    print("EXPERIENCE")
     print(thin)
     for i, exp in enumerate(structured.experience, 1):
-        print(f"  {i}. {exp}")
+        print(f"{i}.{exp}")
     print()
 
-    # Education
-    print("🎓  EDUCATION")
+    print("EDUCATION")
     print(thin)
     for i, edu in enumerate(structured.education, 1):
-        print(f"  {i}. {edu}")
+        print(f"{i}.{edu}")
     print()
 
-    # Projects
     if structured.projects:
-        print("🚀  PROJECTS")
+        print("PROJECTS")
         print(thin)
         for i, proj in enumerate(structured.projects, 1):
-            print(f"  {i}. {proj}")
+            print(f"{i}.{proj}")
         print()
 
-    # Certifications
     if structured.certifications:
-        print("📜  CERTIFICATIONS")
+        print("CERTIFICATIONS")
         print(thin)
         for i, cert in enumerate(structured.certifications, 1):
-            print(f"  {i}. {cert}")
+            print(f"{i}. {cert}")
         print()
 
-    # ── SCORES ──
     print(f"\n{div}")
-    print("  SCORES & ANALYSIS")
+    print("  SCORES AND ANALYSIS")
     print(f"{div}\n")
 
-    # ATS Score bar
-    ats_bar = "█" * (score.ats_score // 5) + "░" * (20 - score.ats_score // 5)
-    print(f"📊  ATS SCORE        : {score.ats_score}/100")
-    print(f"    [{ats_bar}]")
+    ats_bar = "#" * (score.ats_score // 5) + "-" * (20 - score.ats_score // 5)
+    print(f"ATS SCORE : {score.ats_score}/100")
+    print(f"[{ats_bar}]")
     print()
     for reason in score.ats_reasons:
-        print(f"    • {reason}")
+        print(f"-{reason}")
     print()
 
-    # Market Score bar
-    mkt_bar = "█" * (score.market_score // 5) + "░" * (20 - score.market_score // 5)
-    print(f"📈  MARKET SCORE     : {score.market_score}/100")
-    print(f"    [{mkt_bar}]")
+    mkt_bar = "#" * (score.market_score // 5) + "-" * (20 - score.market_score // 5)
+    print(f"MARKET SCORE : {score.market_score}/100")
+    print(f"[{mkt_bar}]")
     print()
     for reason in score.market_reasons:
-        print(f"    • {reason}")
+        print(f"  - {reason}")
     print()
 
-    # Missing Keywords
-    print("🔍  MISSING KEYWORDS")
+    print("MISSING KEYWORDS")
     print(thin)
     print(f"  {',  '.join(score.missing_keywords)}")
     print()
 
-    # Weak Sections
-    print("⚠️   WEAK SECTIONS")
+    print("WEAK SECTIONS")
     print(thin)
     for section in score.weak_sections:
-        print(f"  • {section}")
+        print(f"  - {section}")
     print()
 
-    # Suggestions
-    print("💡  TOP SUGGESTIONS TO IMPROVE")
+    print("TOP SUGGESTIONS")
     print(thin)
     for i, suggestion in enumerate(score.top_suggestions, 1):
         print(f"  {i}. {suggestion}")
     print()
 
-    # Verdict
-    print("🎯  OVERALL VERDICT")
+    print("OVERALL VERDICT")
     print(thin)
-    words = score.overall_verdict.split()
-    line = "  "
-    for word in words:
-        if len(line) + len(word) > 57:
-            print(line)
-            line = "  " + word + " "
-        else:
-            line += word + " "
-    print(line)
+    wrap_text(score.overall_verdict)
     print(f"\n{div}\n")
 
 

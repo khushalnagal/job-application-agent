@@ -53,8 +53,9 @@ def build_tailor_chain(llm):
 
             Rules:
             - Never invent experience or skills the candidate does not have
+            - Do not add tools or technologies to the skills section unless they explicitly appear in the candidate's resume
             - Reorder and rephrase existing content to highlight relevant parts
-            - Add JD keywords naturally where the candidate genuinely has that experience
+            - Only add JD keywords where the candidate has direct evidence of using that tool or technology
             - Quantify achievements where possible based on context clues
             - Make the summary laser focused on this specific role
             - Put the most JD-relevant skills first

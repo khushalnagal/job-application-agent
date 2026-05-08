@@ -58,13 +58,16 @@ def get_llm(temperature: float = 0.0):
 # PDF Text Extraction + Spacing Fix
 # ─────────────────────────────────────────────
 def fix_spacing(text: str) -> str:
+    """
+    Fixes common PDF text extraction artifacts — missing spaces between words,
+    stuck digits and letters, and missing spaces after punctuation.
+    """
     text = re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
     text = re.sub(r'([a-zA-Z])(\d)', r'\1 \2', text)
     text = re.sub(r'(\d)([a-zA-Z])', r'\1 \2', text)
     text = re.sub(r' +', ' ', text)
     text = re.sub(r'([.,;:])([a-zA-Z])', r'\1 \2', text)
     return text.strip()
-
 
 def extract_text_from_pdf(pdf_file) -> str:
     text = ""

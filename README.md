@@ -141,14 +141,6 @@ Generates a tailored cover letter in formal, confident, or concise tone.
 
 - JD Intelligence - extract, structure, and analyze job descriptions
 - Resume Engine - parse, score, tailor, and generate cover letters
-- Agent Orchestrator - LangGraph agent that runs the full pipeline autonomously
+- Agent Orchestrator - LangGraph agent connecting JD analysis, resume parsing, tailoring, and cover letter generation into a stateful pipeline
 - Job Discovery - find matching job openings automatically
 - Interview Coach - generate practice questions and score responses
-
----
-
-## Author
-
-Khushal Nagal
-khushalnagal@gmail.com
-github.com/khushalnagal

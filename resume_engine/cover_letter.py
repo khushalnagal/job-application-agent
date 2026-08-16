@@ -179,12 +179,17 @@ def generate_cover_letter(
 # Quick Test
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
+    import sys
     from parser import parse_resume
+
+    # Usage: python cover_letter.py [path/to/resume.pdf]
+    # Defaults to resume_engine/sample_resume.pdf if no path is given.
+    resume_path = sys.argv[1] if len(sys.argv) > 1 else "sample_resume.pdf"
 
     llm = get_llm()
 
     result = parse_resume(
-        r"C:\Users\khush\OneDrive\Desktop\Docs\Khushal_s_Resume.pdf",
+        resume_path,
         llm
     )
     structured = result["structured"]

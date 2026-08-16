@@ -22,6 +22,16 @@ Upload your resume PDF and get:
 
 ---
 
+## Status
+
+- [x] **JD Intelligence** — complete, with Streamlit UI (`app.py`)
+- [x] **Resume Engine** — backend logic complete (parsing, scoring, tailoring, cover letters); Streamlit UI integration in progress, not yet wired into `app.py`
+- [x] **Agent Orchestrator** — backend LangGraph pipeline complete, connecting all steps into one stateful flow; run directly via `python orchestrator.py`, no UI yet
+- [ ] Job Discovery — planned
+- [ ] Interview Coach — planned
+
+---
+
 ## Concepts Covered
 
 - LLMs with ChatGroq (Llama 3.3-70b, free)
@@ -40,6 +50,7 @@ Upload your resume PDF and get:
 job-application-agent/
 ├── app.py                  # Streamlit UI for JD Intelligence
 ├── jd_analyzer.py          # JD extraction and skills gap chains
+├── orchestrator.py         # LangGraph agent — connects all steps into one pipeline (backend only, no UI yet)
 ├── resume_engine/
 │   ├── __init__.py
 │   ├── parser.py           # PDF extraction, structuring, ATS and market scoring
@@ -139,8 +150,7 @@ Generates a tailored cover letter in formal, confident, or concise tone.
 
 ## Roadmap
 
-- JD Intelligence - extract, structure, and analyze job descriptions
-- Resume Engine - parse, score, tailor, and generate cover letters
-- Agent Orchestrator - LangGraph agent connecting JD analysis, resume parsing, tailoring, and cover letter generation into a stateful pipeline
+- Wire the Resume Engine into the Streamlit UI as a second tab
+- Wire the Agent Orchestrator into the Streamlit UI as an end-to-end "Run Full Pipeline" flow
 - Job Discovery - find matching job openings automatically
 - Interview Coach - generate practice questions and score responses

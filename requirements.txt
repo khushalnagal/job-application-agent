@@ -3,3 +3,5 @@ langchain-core
 pydantic
 streamlit
 pdfplumber
+langgraph
+python-dotenv
